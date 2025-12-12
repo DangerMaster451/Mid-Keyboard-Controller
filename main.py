@@ -12,26 +12,27 @@ class Key():
         self.fill_color = fill_color
         self.outline_color = outline_color
 
-
-        
-
 class Piano(tk.Canvas):
     def __init__(self, root:tk.Tk) -> None:
-        self.total_keys = 34
+        self.total_keys = 37
         self.root = root
-        self.width = 1100
-        self.height = 150
         self.key_width = 25
+        self.width = self.getWidth()
+        self.height = 150
         super().__init__(self.root, width=self.width, height=self.height, bg="gray99")
 
         self.place_keys()
+
+    def getWidth(self) -> int:
+        return round((self.total_keys-2) * 0.63) * self.key_width + 4
+
 
     def place_keys(self) -> None:
         keys:list[Key] = []
 
         for i in range(self.total_keys):
             if len(keys) == 0:
-                key = Key(self, 0, self.key_width, self.height, "white", "black")
+                key = Key(self, 2, self.key_width, self.height, "white", "black")
             elif i % 12 in [1,3,6,8,10]:
                 key = Key(self, keys[i-1].right_x - round(self.key_width/2), self.key_width, round(self.height/2), "black", "white")
             else:
@@ -49,17 +50,6 @@ class Piano(tk.Canvas):
         for key in keys:
             self.create_rectangle(key.left_x, key.left_y, key.right_x, key.right_y, fill=key.fill_color, outline=key.outline_color)
 
-            
-            
-            
-
-
-
-
-
-
-    
-        
 
 root = tk.Tk()
 piano = Piano(root)
