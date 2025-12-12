@@ -11,6 +11,13 @@ class Key():
         self.canvas = canvas
         self.fill_color = fill_color
         self.outline_color = outline_color
+        self.rect:int
+
+    def on_enter(self, event):
+        self.canvas.itemconfig(self.rect, fill="gray80")
+    
+    def on_leave(self, event):
+        self.canvas.itemconfig(self.rect, fill=self.fill_color)
 
 class Piano(tk.Canvas):
     def __init__(self, root:tk.Tk) -> None:
@@ -19,6 +26,7 @@ class Piano(tk.Canvas):
         self.key_width = 25
         self.width = self.getWidth()
         self.height = 150
+        self.piano_keys:list[Key] = []
         super().__init__(self.root, width=self.width, height=self.height, bg="gray99")
 
         self.place_keys()
@@ -26,30 +34,28 @@ class Piano(tk.Canvas):
     def getWidth(self) -> int:
         return round((self.total_keys-2) * 0.63) * self.key_width + 4
 
-
     def place_keys(self) -> None:
-        keys:list[Key] = []
-
         for i in range(self.total_keys):
-            if len(keys) == 0:
+            if len(self.piano_keys) == 0:
                 key = Key(self, 2, self.key_width, self.height, "white", "black")
             elif i % 12 in [1,3,6,8,10]:
-                key = Key(self, keys[i-1].right_x - round(self.key_width/2), self.key_width, round(self.height/2), "black", "white")
+                key = Key(self, self.piano_keys[i-1].right_x - round(self.key_width/2), self.key_width, round(self.height/2), "black", "white")
             else:
-                if keys[i-1].fill_color == "black":
-                    key = Key(self, keys[i-2].right_x, self.key_width, self.height, "white", "black")
+                if self.piano_keys[i-1].fill_color == "black":
+                    key = Key(self, self.piano_keys[i-2].right_x, self.key_width, self.height, "white", "black")
                 else:
-                    key = Key(self, keys[i-1].right_x, self.key_width, self.height, "white", "black")
-            keys.append(key)
+                    key = Key(self, self.piano_keys[i-1].right_x, self.key_width, self.height, "white", "black")
+            self.piano_keys.append(key)
 
-        for index, key in enumerate(keys):
+        for index, key in enumerate(self.piano_keys):
             if key.fill_color == "black":
-                keys.pop(index)
-                keys.append(key)
+                self.piano_keys.pop(index)
+                self.piano_keys.append(key)
 
-        for key in keys:
-            self.create_rectangle(key.left_x, key.left_y, key.right_x, key.right_y, fill=key.fill_color, outline=key.outline_color)
-
+        for key in self.piano_keys:
+            key.rect = self.create_rectangle(key.left_x, key.left_y, key.right_x, key.right_y, fill=key.fill_color, outline=key.outline_color)
+            self.tag_bind(key.rect, "<Enter>", key.on_enter)
+            self.tag_bind(key.rect, "<Leave>", key.on_leave)
 
 root = tk.Tk()
 piano = Piano(root)
